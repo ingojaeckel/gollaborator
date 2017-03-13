@@ -7,6 +7,18 @@ import (
 	"testing"
 )
 
+func TestGetIndex(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/index.html", nil)
+	handleGetIndex(rr, req)
+	if rr.Code != 200 {
+		t.Errorf("Unexpected status: %d", rr.Code)
+	}
+	if len(rr.Body.String()) == 0 {
+		t.Error("Should have not received an empty response")
+	}
+}
+
 func TestCreateRoom(t *testing.T) {
 	len1 := len(rooms)
 
