@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>gollaborate</title>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        $(function() {
+            const userId = "user-id-" + Date.now();
+            $("#userName").val("Me-" + Date.now());
+
+            var ws = new WebSocket("ws://localhost:8081/");
+            ws.onopen = function(data) {
+                console.log("onopen: " + data);
+            }
+            ws.onmessage = function(data) {
+                updateContent(data.data);
+            }
+            ws.onclose = function(data) {
+                console.log("onclose: " + data);
+            }
+            $('#createRoomBtn').click(function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/room",
+                    error: function(data) {
+                        console.error(data);
+                    },
+                    success: function(data) {
+                        var roomId = data;
+                        console.log("created room " + roomId);
+                        $("#existingRoomId").val(roomId);
+
+                        subscribe(roomId, ws);
+                    }
+                });
+            });
+            $("#joinExistingRoomBtn").click(function() {
+                var roomId = $("#existingRoomId").val();
+                subscribe(roomId, ws);
+            });
+
+            function subscribe(roomId, ws) {
+                var subscribeRequest = {
+                    roomId: roomId,
+                    userId: userId,
+                    userName: $("#userName").val()
+                };
+
+                console.log("subscribing to updates..");
+                ws.send(JSON.stringify(subscribeRequest));
+
+                $("#content").on("input", function(e) {
+                    // TODO limit frequency of this. don't send every single update.
+                    sendUpdate(roomId, e.target.value);
+                });
+            }
+
+            function sendUpdate(roomId) {
+                var updateRequest = {
+                    roomId: roomId,
+                    userId: userId,
+                    update: $("#content").val(),
+                };
+                $.ajax({
+                    type: "UPDATE",
+                    url: "/room",
+                    data: JSON.stringify(updateRequest),
+                    dataType: "json",
+                    error: function(data) {
+                        console.error(data);
+                    }
+                });
+            }
+
+            function updateContent(newContent) {
+                $("#content").val(newContent)
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Gollaborate!</h1>
+        <p>Your name:
+            <input id="userName" type="text" value="Me" />
+        </p>
+        <p>
+            Either
+            <input id="createRoomBtn" type="button" value="create a document" /> or input code
+            <input id="existingRoomId" type="text" value="" size="10" /> and
+            <input type="button" id="joinExistingRoomBtn" value="join" />.
+        </p>
+        <p>
+            <textarea id="content" type="text" cols="100" rows="10"></textarea>
+        </p>
+    </div>
+</body>
+
+</html>
