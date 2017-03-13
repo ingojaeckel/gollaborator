@@ -1,5 +1,5 @@
-[![Build Status](https://img.shields.io/travis/ingojaeckel/gollaborate.svg)](https://travis-ci.org/ingojaeckel/gollaborate)
-[![Code Coverage Status](https://img.shields.io/codecov/c/github/ingojaeckel/gollaborate.svg)](https://codecov.io/gh/ingojaeckel/gollaborate)
+[![Build Status](https://img.shields.io/travis/ingojaeckel/gollaborator.svg)](https://travis-ci.org/ingojaeckel/gollaborator)
+[![Code Coverage Status](https://img.shields.io/codecov/c/github/ingojaeckel/gollaborator.svg)](https://codecov.io/gh/ingojaeckel/gollaborator)
 
 # gollaborate
 
