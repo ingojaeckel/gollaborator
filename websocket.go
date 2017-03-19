@@ -35,6 +35,16 @@ func wsHandler(ws *websocket.Conn) {
 		}
 		fmt.Printf("Subscribed user %s to room %s\n", subReq.UserID, subReq.RoomID)
 
+		// Send the current value as the first update to this client.
+		initialValue, err := roomService.Get(subReq.RoomID)
+		if err != nil {
+			fmt.Println("Failed to retrieve room content: ", err.Error())
+			break
+		}
+		if err = websocket.Message.Send(ws, initialValue); err != nil {
+			fmt.Println("Failed to send out initial value: ", err.Error())
+			break
+		}
 	}
 	// Connection will be closed when reaching this point.
 }
