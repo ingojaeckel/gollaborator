@@ -10,7 +10,8 @@ import (
 func TestGetIndex(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/index.html", nil)
-	handleGetIndex(rr, req)
+	f := handleGetStaticResource("index.html")
+	f(rr, req)
 	if rr.Code != 200 {
 		t.Errorf("Unexpected status: %d", rr.Code)
 	}
@@ -20,7 +21,7 @@ func TestGetIndex(t *testing.T) {
 }
 
 func TestCreateRoom(t *testing.T) {
-	len1 := len(rooms)
+	len1 := len(roomService.Rooms)
 
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/room", nil)
@@ -29,16 +30,16 @@ func TestCreateRoom(t *testing.T) {
 		t.Errorf("Unexpected status: %d", rr.Code)
 	}
 
-	len2 := len(rooms)
+	len2 := len(roomService.Rooms)
 
 	if len2-len1 != 1 {
 		t.Error("number of rooms has not increased by one")
 	}
 
 	id := rr.Body.String()
-	_, ok := rooms[id]
+	_, ok := roomService.Rooms[id]
 	if !ok {
-		t.Errorf("returned id of a room which does not exist: %s. rooms=%v", id, rooms)
+		t.Errorf("returned id of a room which does not exist: %s. rooms=%v", id, roomService.Rooms)
 	}
 }
 

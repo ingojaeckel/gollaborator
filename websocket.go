@@ -34,6 +34,7 @@ func wsHandler(ws *websocket.Conn) {
 			break
 		}
 		fmt.Printf("Subscribed user %s to room %s\n", subReq.UserID, subReq.RoomID)
+
 	}
 	// Connection will be closed when reaching this point.
 }

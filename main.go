@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const maxRooms = 10
 const portHTTP = 8080
 const portWebsocket = 8081
 
@@ -20,13 +21,8 @@ func main() {
 	}()
 
 	mxHTTP := http.NewServeMux()
-	mxHTTP.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			handleGetIndex(w, r)
-		} else {
-			w.WriteHeader(415)
-		}
-	})
+
+	mxHTTP.HandleFunc("/", handleGetStaticResource("index.html"))
 	mxHTTP.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			handleCreateRoom(w, r)

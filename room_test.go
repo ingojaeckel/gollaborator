@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func TestRoomCreate(t *testing.T) {
+func TestRoomCreateUpdateGet(t *testing.T) {
 	newRoom, err := roomService.New()
 	if err != nil {
 		t.Error(err.Error())
@@ -10,9 +10,28 @@ func TestRoomCreate(t *testing.T) {
 	if newRoom.ID == "" {
 		t.Error("new room id must not be empty")
 	}
-	_, ok := rooms[newRoom.ID]
-	if !ok {
-		t.Error("room did not actually get created")
+	if newRoom.Content != "" {
+		t.Error("new room must be empty")
+	}
+
+	content, err := roomService.Get(newRoom.ID)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if content != "" {
+		t.Error("new room must be empty")
+	}
+
+	if !roomService.Update(newRoom.ID, "hello world") {
+		t.Error("room was not found")
+	}
+
+	content, err = roomService.Get(newRoom.ID)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if content != "hello world" {
+		t.Errorf("room content update failed: %v", content)
 	}
 }
 

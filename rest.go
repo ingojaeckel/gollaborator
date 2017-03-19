@@ -9,14 +9,21 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func handleGetIndex(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadFile("index.html")
-	if err != nil {
-		writeJSON(w, 400, err.Error())
-		return
+// TODO add caching related headers
+func handleGetStaticResource(filename string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(415)
+			return
+		}
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			writeJSON(w, 400, err.Error())
+			return
+		}
+		w.WriteHeader(200)
+		io.WriteString(w, string(b))
 	}
-	w.WriteHeader(200)
-	io.WriteString(w, string(b))
 }
 
 func handleCreateRoom(w http.ResponseWriter, r *http.Request) {

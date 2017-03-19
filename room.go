@@ -1,17 +1,12 @@
 package main
 
-import (
-	"errors"
+import "errors"
 
-	"github.com/satori/go.uuid"
-)
-
-const maxRooms = 10
-
-var rooms map[string]room
 var roomService roomSvc
 
-type roomSvc struct{}
+type roomSvc struct {
+	Rooms map[string]*room
+}
 
 type room struct {
 	ID      string
@@ -20,27 +15,39 @@ type room struct {
 
 type roomAccess interface {
 	New() (room, error)
+	Get(id string) (string, error)
 	Update(id string, content string) bool
 }
 
-func (r roomSvc) New() (room, error) {
-	if len(rooms) >= maxRooms {
+func (rs *roomSvc) New() (room, error) {
+	if len(rs.Rooms) >= maxRooms {
 		return room{}, errors.New("Too many open rooms")
 	}
-	newRoom := room{uuid.NewV4().String(), ""}
-	if rooms == nil {
-		rooms = make(map[string]room, maxRooms)
+	newRoom := room{id(5), ""}
+	if rs.Rooms == nil {
+		rs.Rooms = make(map[string]*room, maxRooms)
 	}
-	rooms[newRoom.ID] = newRoom
+	rs.Rooms[newRoom.ID] = &newRoom
 	return newRoom, nil
 }
 
-func (r roomSvc) Update(id string, content string) bool {
-	_, ok := rooms[id]
-	if ok {
-		r := rooms[id]
-		r.Content = content
-		return true
+func (rs *roomSvc) Update(id string, content string) bool {
+	r, ok := rs.Rooms[id]
+	if !ok {
+		return false
 	}
-	return false
+	r.Content = content
+	return true
+}
+
+func (rs roomSvc) Get(id string) (string, error) {
+	if rs.Rooms == nil {
+		return "", errors.New("Room not found")
+	}
+
+	r, ok := rs.Rooms[id]
+	if !ok {
+		return "", errors.New("Room not found")
+	}
+	return r.Content, nil
 }
